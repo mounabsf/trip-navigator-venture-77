@@ -1,125 +1,125 @@
 
-import { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
+import { User, loginUser, registerUser, updateUserProfile } from '@/services/api';
 import { toast } from 'sonner';
 
-type User = {
-  id: string;
-  name: string;
-  email: string;
-};
-
-type AuthContextType = {
+interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<void>;
-  signup: (name: string, email: string, password: string) => Promise<void>;
+  loading: boolean;
+  login: (email: string, password: string) => Promise<boolean>;
+  register: (name: string, email: string, password: string) => Promise<boolean>;
   logout: () => void;
-  isLoading: boolean;
-};
+  updateProfile: (name: string, email: string, password?: string) => Promise<boolean>;
+}
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Check for stored user on component mount
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (e) {
+        console.error('Failed to parse stored user:', e);
+        localStorage.removeItem('user');
+      }
+    }
+    setLoading(false);
+  }, []);
+
+  const login = async (email: string, password: string): Promise<boolean> => {
+    setLoading(true);
+    try {
+      const response = await loginUser(email, password);
+      
+      if (response.success && response.user) {
+        setUser(response.user);
+        localStorage.setItem('user', JSON.stringify(response.user));
+        toast.success('Login successful');
+        return true;
+      } else {
+        toast.error(response.message || 'Login failed');
+        return false;
+      }
+    } catch (error) {
+      toast.error('An error occurred during login');
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const register = async (name: string, email: string, password: string): Promise<boolean> => {
+    setLoading(true);
+    try {
+      const response = await registerUser(name, email, password);
+      
+      if (response.success && response.user) {
+        setUser(response.user);
+        localStorage.setItem('user', JSON.stringify(response.user));
+        toast.success('Registration successful');
+        return true;
+      } else {
+        toast.error(response.message || 'Registration failed');
+        return false;
+      }
+    } catch (error) {
+      toast.error('An error occurred during registration');
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem('user');
+    toast.success('Logged out successfully');
+  };
+
+  const updateProfile = async (name: string, email: string, password?: string): Promise<boolean> => {
+    if (!user) return false;
+    
+    setLoading(true);
+    try {
+      const response = await updateUserProfile(user.id, name, email, password);
+      
+      if (response.success && response.user) {
+        const updatedUser = { ...user, name, email };
+        setUser(updatedUser);
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        toast.success('Profile updated successfully');
+        return true;
+      } else {
+        toast.error(response.message || 'Profile update failed');
+        return false;
+      }
+    } catch (error) {
+      toast.error('An error occurred during profile update');
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, loading, login, register, logout, updateProfile }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 };
 
-// Mock user database
-const MOCK_USERS = [
-  {
-    id: '1',
-    name: 'Test User',
-    email: 'test@example.com',
-    password: 'password123'
-  }
-];
-
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    // Check if user exists in localStorage
-    const storedUser = localStorage.getItem('travel-user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    setIsLoading(false);
-  }, []);
-
-  const login = async (email: string, password: string) => {
-    setIsLoading(true);
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const foundUser = MOCK_USERS.find(u => 
-      u.email === email && u.password === password
-    );
-    
-    if (foundUser) {
-      const { password, ...userWithoutPassword } = foundUser;
-      setUser(userWithoutPassword);
-      localStorage.setItem('travel-user', JSON.stringify(userWithoutPassword));
-      toast.success('Login successful!');
-    } else {
-      toast.error('Invalid email or password');
-    }
-    
-    setIsLoading(false);
-  };
-
-  const signup = async (name: string, email: string, password: string) => {
-    setIsLoading(true);
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const existingUser = MOCK_USERS.find(u => u.email === email);
-    
-    if (existingUser) {
-      toast.error('Email already in use');
-    } else {
-      const newUser = {
-        id: String(MOCK_USERS.length + 1),
-        name,
-        email,
-        password
-      };
-      
-      // In a real app, we would add the user to the database
-      // For this mock, we'll just add to our mock array
-      MOCK_USERS.push(newUser);
-      
-      const { password: _, ...userWithoutPassword } = newUser;
-      setUser(userWithoutPassword);
-      localStorage.setItem('travel-user', JSON.stringify(userWithoutPassword));
-      
-      toast.success('Account created successfully!');
-    }
-    
-    setIsLoading(false);
-  };
-
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('travel-user');
-    toast.success('Logged out successfully');
-  };
-
-  return (
-    <AuthContext.Provider
-      value={{
-        user,
-        login,
-        signup,
-        logout,
-        isLoading,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
-};
+export default AuthContext;

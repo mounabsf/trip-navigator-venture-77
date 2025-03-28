@@ -1,7 +1,11 @@
+
 import { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { useAuth } from '@/context/AuthContext';
+import { getDestinations, createReservation } from '@/services/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,129 +15,18 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { format } from 'date-fns';
-import { CalendarIcon, Users, TicketCheck, Clock, Map, MapPin, Plane, Hotel, Coffee, Camera, BadgeDollarSign } from 'lucide-react';
+import { CalendarIcon, Users, TicketCheck, Clock, Map, MapPin, Plane, Hotel, Coffee, Camera, BadgeDollarSign, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Destination {
   id: number;
   name: string;
+  location: string;
   image: string;
   description: string;
   price: number;
   duration: number;
-  location: string;
 }
-
-const allDestinations: Destination[] = [
-  {
-    id: 1,
-    name: 'Paris',
-    image: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=600&q=80',
-    description: 'Experience the romance of the City of Light with iconic landmarks like the Eiffel Tower and charming cafés.',
-    price: 1299,
-    duration: 7,
-    location: 'France'
-  },
-  {
-    id: 2,
-    name: 'Tokyo',
-    image: 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=600&q=80',
-    description: 'Discover the perfect blend of tradition and innovation in Japan\'s vibrant capital city.',
-    price: 1599,
-    duration: 10,
-    location: 'Japan'
-  },
-  {
-    id: 3,
-    name: 'Rome',
-    image: 'https://images.unsplash.com/photo-1525874684015-58379d421a52?auto=format&fit=crop&w=600&q=80',
-    description: 'Explore ancient history and enjoy delicious Italian cuisine in the Eternal City.',
-    price: 1199,
-    duration: 6,
-    location: 'Italy'
-  },
-  {
-    id: 4,
-    name: 'Bali',
-    image: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=600&q=80',
-    description: 'Relax on pristine beaches and immerse yourself in the rich cultural heritage of this Indonesian paradise.',
-    price: 1099,
-    duration: 8,
-    location: 'Indonesia'
-  },
-  {
-    id: 5,
-    name: 'New York',
-    image: 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?auto=format&fit=crop&w=600&q=80',
-    description: 'Experience the energy of the city that never sleeps with world-class shopping, dining, and entertainment.',
-    price: 1499,
-    duration: 5,
-    location: 'USA'
-  },
-  {
-    id: 6,
-    name: 'Santorini',
-    image: 'https://images.unsplash.com/photo-1533105079780-92b9be482077?auto=format&fit=crop&w=600&q=80',
-    description: 'Enjoy breathtaking sunsets and stunning views on this iconic Greek island with white-washed buildings.',
-    price: 1399,
-    duration: 6,
-    location: 'Greece'
-  },
-  {
-    id: 7,
-    name: 'Sydney',
-    image: 'https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?auto=format&fit=crop&w=600&q=80',
-    description: 'Explore the beautiful harbor city with the iconic Opera House and vibrant cultural scene.',
-    price: 1799,
-    duration: 12,
-    location: 'Australia'
-  },
-  {
-    id: 8,
-    name: 'London',
-    image: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=600&q=80',
-    description: 'Discover the rich history and modern attractions of England\'s vibrant capital city.',
-    price: 1349,
-    duration: 7,
-    location: 'UK'
-  },
-  {
-    id: 9,
-    name: 'Bangkok',
-    image: 'https://images.unsplash.com/photo-1508009603885-50cf7c8dd0c5?auto=format&fit=crop&w=600&q=80',
-    description: 'Experience the vibrant street life, ornate temples, and amazing cuisine of Thailand\'s capital.',
-    price: 999,
-    duration: 9,
-    location: 'Thailand'
-  },
-  {
-    id: 10,
-    name: 'Barcelona',
-    image: 'https://images.unsplash.com/photo-1523531294919-4bcd7c65e216?auto=format&fit=crop&w=600&q=80',
-    description: 'Enjoy the unique architecture, beautiful beaches, and vibrant culture of this Spanish city.',
-    price: 1199,
-    duration: 6,
-    location: 'Spain'
-  },
-  {
-    id: 11,
-    name: 'Dubai',
-    image: 'https://images.unsplash.com/photo-1580674684081-7617fbf3d745?auto=format&fit=crop&w=600&q=80',
-    description: 'Experience the luxury and innovation of this futuristic desert city with stunning architecture.',
-    price: 1699,
-    duration: 7,
-    location: 'UAE'
-  },
-  {
-    id: 12,
-    name: 'Cairo',
-    image: 'https://images.unsplash.com/photo-1553913861-c0fddf2619ee?auto=format&fit=crop&w=600&q=80',
-    description: 'Explore ancient pyramids and experience the rich history of Egypt\'s bustling capital city.',
-    price: 1099,
-    duration: 8,
-    location: 'Egypt'
-  }
-];
 
 type ActivityType = "sightseeing" | "culture" | "food" | "outdoor" | "relaxation";
 
@@ -164,6 +57,8 @@ const genericActivities: Record<ActivityType, string[]> = {
 
 const PlanTrip = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const searchParams = new URLSearchParams(location.search);
   const destinationId = searchParams.get('destination');
 
@@ -173,18 +68,28 @@ const PlanTrip = () => {
   const [itinerary, setItinerary] = useState<string[][]>([]);
   const [showReservation, setShowReservation] = useState(false);
   const [reservationComplete, setReservationComplete] = useState(false);
+  const [isBooking, setIsBooking] = useState(false);
   const [totalPrice, setTotalPrice] = useState(0);
   const [currentTab, setCurrentTab] = useState('details');
+  const [bookingReference, setBookingReference] = useState('');
 
+  // Fetch destinations data
+  const { data: destinationsResponse, isLoading, isError } = useQuery({
+    queryKey: ['destinations'],
+    queryFn: getDestinations
+  });
+
+  // Set a destination if one was passed in the URL
   useEffect(() => {
-    if (destinationId) {
-      const found = allDestinations.find(d => d.id === parseInt(destinationId));
+    if (destinationId && destinationsResponse?.data) {
+      const found = destinationsResponse.data.find(d => d.id === parseInt(destinationId));
       if (found) {
         setSelectedDestination(found);
       }
     }
-  }, [destinationId]);
+  }, [destinationId, destinationsResponse]);
 
+  // Calculate total price when destination or travelers change
   useEffect(() => {
     if (selectedDestination) {
       setTotalPrice(selectedDestination.price * parseInt(travelers || '1'));
@@ -200,21 +105,21 @@ const PlanTrip = () => {
     const days = selectedDestination.duration;
     const newItinerary: string[][] = [];
     
-    const activities = destinationActivities[selectedDestination.name] || genericActivities;
+    const destActivities = destinationActivities[selectedDestination.name] || genericActivities;
     
     for (let i = 0; i < days; i++) {
       const dayActivities: string[] = [];
       
       const morningType = Math.random() > 0.5 ? 'sightseeing' : 'culture';
-      const morningActivities = activities[morningType];
+      const morningActivities = destActivities[morningType];
       dayActivities.push(morningActivities[Math.floor(Math.random() * morningActivities.length)]);
       
       const afternoonType = Math.random() > 0.5 ? 'food' : 'outdoor';
-      const afternoonActivities = activities[afternoonType];
+      const afternoonActivities = destActivities[afternoonType];
       dayActivities.push(afternoonActivities[Math.floor(Math.random() * afternoonActivities.length)]);
       
       const eveningType = Math.random() > 0.5 ? 'food' : 'relaxation';
-      const eveningActivities = activities[eveningType];
+      const eveningActivities = destActivities[eveningType];
       dayActivities.push(eveningActivities[Math.floor(Math.random() * eveningActivities.length)]);
       
       newItinerary.push(dayActivities);
@@ -235,13 +140,48 @@ const PlanTrip = () => {
     }
     
     setShowReservation(true);
+    setCurrentTab('reservation');
   };
 
-  const handleReservation = () => {
-    setTimeout(() => {
-      setReservationComplete(true);
-      toast.success('Your trip has been successfully booked!');
-    }, 1000);
+  const handleReservation = async () => {
+    if (!user) {
+      toast.error('Please log in to book a trip');
+      navigate('/login');
+      return;
+    }
+    
+    if (!selectedDestination || !date) {
+      toast.error('Missing trip details');
+      return;
+    }
+    
+    setIsBooking(true);
+    
+    try {
+      const formattedDate = format(date, 'yyyy-MM-dd');
+      
+      const response = await createReservation(
+        user.id,
+        selectedDestination.id,
+        formattedDate,
+        parseInt(travelers),
+        totalPrice,
+        itinerary
+      );
+      
+      if (response.success) {
+        setBookingReference(response.data?.bookingReference || '');
+        setReservationComplete(true);
+        toast.success('Your trip has been successfully booked!');
+      } else {
+        toast.error(response.message || 'Failed to book your trip');
+      }
+    } catch (error) {
+      console.error('Booking error:', error);
+      toast.error('An error occurred while booking your trip');
+    } finally {
+      setIsBooking(false);
+    }
   };
 
   const handlePrint = () => {
@@ -262,7 +202,18 @@ const PlanTrip = () => {
         <div className="container mx-auto px-4">
           <h1 className="text-3xl font-bold text-center mb-8">Plan Your Trip</h1>
           
-          {!reservationComplete ? (
+          {isLoading ? (
+            <div className="flex justify-center py-12">
+              <Loader2 className="h-10 w-10 animate-spin text-travel-blue-bright" />
+            </div>
+          ) : isError ? (
+            <div className="text-center py-12">
+              <p className="text-destructive">Error loading destinations. Please try again later.</p>
+              <Button onClick={() => window.location.reload()} variant="outline" className="mt-4">
+                Retry
+              </Button>
+            </div>
+          ) : !reservationComplete ? (
             <div className="max-w-4xl mx-auto">
               <Tabs value={currentTab} onValueChange={setCurrentTab}>
                 <TabsList className="grid w-full grid-cols-3 mb-8">
@@ -283,7 +234,7 @@ const PlanTrip = () => {
                         <Select 
                           value={selectedDestination?.id.toString() || ''} 
                           onValueChange={(value) => {
-                            const dest = allDestinations.find(d => d.id === parseInt(value));
+                            const dest = destinationsResponse?.data?.find(d => d.id === parseInt(value));
                             setSelectedDestination(dest || null);
                             setItinerary([]);
                           }}
@@ -292,7 +243,7 @@ const PlanTrip = () => {
                             <SelectValue placeholder="Select a destination" />
                           </SelectTrigger>
                           <SelectContent>
-                            {allDestinations.map(destination => (
+                            {destinationsResponse?.data?.map(destination => (
                               <SelectItem key={destination.id} value={destination.id.toString()}>
                                 {destination.name}, {destination.location}
                               </SelectItem>
@@ -302,7 +253,7 @@ const PlanTrip = () => {
                       </div>
                       
                       {selectedDestination && (
-                        <div className="bg-white p-4 rounded-lg shadow-sm">
+                        <div className="bg-white dark:bg-muted p-4 rounded-lg shadow-sm">
                           <div className="flex flex-col md:flex-row gap-4">
                             <div className="w-full md:w-1/3">
                               <img 
@@ -313,11 +264,11 @@ const PlanTrip = () => {
                             </div>
                             <div className="w-full md:w-2/3">
                               <h3 className="text-xl font-semibold mb-2">{selectedDestination.name}</h3>
-                              <div className="flex items-center text-sm text-gray-500 mb-2">
+                              <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-2">
                                 <MapPin className="h-4 w-4 mr-1" />
                                 {selectedDestination.location}
                               </div>
-                              <p className="text-gray-600 mb-4">{selectedDestination.description}</p>
+                              <p className="text-gray-600 dark:text-gray-300 mb-4">{selectedDestination.description}</p>
                               <div className="flex flex-wrap gap-4">
                                 <div className="flex items-center text-sm">
                                   <Clock className="h-4 w-4 mr-1 text-travel-orange" />
@@ -399,7 +350,7 @@ const PlanTrip = () => {
                       {itinerary.length > 0 ? (
                         <div className="space-y-6">
                           {itinerary.map((dayActivities, dayIndex) => (
-                            <div key={dayIndex} className="bg-white p-4 rounded-lg border">
+                            <div key={dayIndex} className="bg-white dark:bg-muted p-4 rounded-lg border">
                               <h3 className="text-lg font-semibold mb-3">Day {dayIndex + 1}</h3>
                               <ul className="space-y-3">
                                 <li className="flex items-start">
@@ -426,7 +377,7 @@ const PlanTrip = () => {
                         </div>
                       ) : (
                         <div className="text-center py-12">
-                          <p className="text-gray-500 mb-4">No itinerary has been generated yet.</p>
+                          <p className="text-gray-500 dark:text-gray-400 mb-4">No itinerary has been generated yet.</p>
                           <Button onClick={generateItinerary}>Generate Itinerary</Button>
                         </div>
                       )}
@@ -453,28 +404,28 @@ const PlanTrip = () => {
                       </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
-                      <div className="bg-white p-4 rounded-lg border">
+                      <div className="bg-white dark:bg-muted p-4 rounded-lg border">
                         <h3 className="text-lg font-semibold mb-4">Trip Summary</h3>
                         <div className="space-y-3">
                           <div className="flex justify-between">
-                            <span className="text-gray-600">Destination:</span>
+                            <span className="text-gray-600 dark:text-gray-400">Destination:</span>
                             <span className="font-medium">{selectedDestination?.name}, {selectedDestination?.location}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-gray-600">Travel Date:</span>
+                            <span className="text-gray-600 dark:text-gray-400">Travel Date:</span>
                             <span className="font-medium">{date ? format(date, 'PPP') : '-'}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-gray-600">Duration:</span>
+                            <span className="text-gray-600 dark:text-gray-400">Duration:</span>
                             <span className="font-medium">{selectedDestination?.duration} days</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-gray-600">Travelers:</span>
+                            <span className="text-gray-600 dark:text-gray-400">Travelers:</span>
                             <span className="font-medium">{travelers}</span>
                           </div>
                           <div className="border-t pt-3 mt-3">
                             <div className="flex justify-between">
-                              <span className="text-gray-600">Price per person:</span>
+                              <span className="text-gray-600 dark:text-gray-400">Price per person:</span>
                               <span className="font-medium">${selectedDestination?.price}</span>
                             </div>
                             <div className="flex justify-between font-semibold text-lg mt-2">
@@ -485,60 +436,53 @@ const PlanTrip = () => {
                         </div>
                       </div>
                       
-                      <div className="bg-white p-4 rounded-lg border">
-                        <h3 className="text-lg font-semibold mb-4">Personal Information</h3>
-                        <div className="space-y-4">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                              <Label htmlFor="firstName">First Name</Label>
-                              <Input id="firstName" placeholder="Enter your first name" />
-                            </div>
-                            <div>
-                              <Label htmlFor="lastName">Last Name</Label>
-                              <Input id="lastName" placeholder="Enter your last name" />
-                            </div>
-                          </div>
-                          <div>
-                            <Label htmlFor="email">Email Address</Label>
-                            <Input id="email" type="email" placeholder="Enter your email" />
-                          </div>
-                          <div>
-                            <Label htmlFor="phone">Phone Number</Label>
-                            <Input id="phone" placeholder="Enter your phone number" />
-                          </div>
+                      {!user && (
+                        <div className="bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-900 text-amber-800 dark:text-amber-300 p-4 rounded-lg">
+                          <h3 className="font-medium mb-2">Login Required</h3>
+                          <p className="text-sm mb-3">You need to be logged in to complete your reservation.</p>
+                          <Button 
+                            onClick={() => navigate('/login')} 
+                            variant="outline" 
+                            className="text-sm border-amber-300 dark:border-amber-700 bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-800"
+                          >
+                            Log in to continue
+                          </Button>
                         </div>
-                      </div>
+                      )}
                       
-                      <div className="bg-white p-4 rounded-lg border">
-                        <h3 className="text-lg font-semibold mb-4">Payment Information</h3>
-                        <p className="text-gray-500 text-sm mb-4">
-                          For the purposes of this demo, no actual payment processing will occur.
-                        </p>
-                        <div className="space-y-4">
-                          <div>
-                            <Label htmlFor="cardNumber">Card Number</Label>
-                            <Input id="cardNumber" placeholder="1234 5678 9012 3456" />
-                          </div>
-                          <div className="grid grid-cols-2 gap-4">
-                            <div>
-                              <Label htmlFor="expiry">Expiry Date</Label>
-                              <Input id="expiry" placeholder="MM/YY" />
+                      {user && (
+                        <div className="bg-white dark:bg-muted p-4 rounded-lg border">
+                          <h3 className="text-lg font-semibold mb-4">Personal Information</h3>
+                          <div className="space-y-3">
+                            <div className="flex justify-between">
+                              <span className="text-gray-600 dark:text-gray-400">Name:</span>
+                              <span className="font-medium">{user.name}</span>
                             </div>
-                            <div>
-                              <Label htmlFor="cvc">CVC</Label>
-                              <Input id="cvc" placeholder="123" />
+                            <div className="flex justify-between">
+                              <span className="text-gray-600 dark:text-gray-400">Email:</span>
+                              <span className="font-medium">{user.email}</span>
                             </div>
                           </div>
                         </div>
-                      </div>
+                      )}
                     </CardContent>
                     <CardFooter>
                       <Button 
                         onClick={handleReservation}
+                        disabled={isBooking || !user}
                         className="w-full bg-travel-blue-bright hover:bg-travel-blue-bright/90"
                       >
-                        <TicketCheck className="mr-2 h-4 w-4" />
-                        Confirm Reservation
+                        {isBooking ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Processing...
+                          </>
+                        ) : (
+                          <>
+                            <TicketCheck className="mr-2 h-4 w-4" />
+                            Confirm Reservation
+                          </>
+                        )}
                       </Button>
                     </CardFooter>
                   </Card>
@@ -549,8 +493,8 @@ const PlanTrip = () => {
             <div className="max-w-4xl mx-auto">
               <Card>
                 <CardHeader className="text-center">
-                  <div className="mx-auto bg-green-100 p-3 rounded-full mb-4">
-                    <TicketCheck className="h-8 w-8 text-green-600" />
+                  <div className="mx-auto bg-green-100 dark:bg-green-900 p-3 rounded-full mb-4">
+                    <TicketCheck className="h-8 w-8 text-green-600 dark:text-green-300" />
                   </div>
                   <CardTitle className="text-2xl">Reservation Confirmed!</CardTitle>
                   <CardDescription>
@@ -558,28 +502,28 @@ const PlanTrip = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  <div className="bg-white p-4 rounded-lg border">
+                  <div className="bg-white dark:bg-muted p-4 rounded-lg border">
                     <h3 className="text-lg font-semibold mb-4">Trip Details</h3>
                     <div className="space-y-3">
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Destination:</span>
+                        <span className="text-gray-600 dark:text-gray-400">Destination:</span>
                         <span className="font-medium">{selectedDestination?.name}, {selectedDestination?.location}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Travel Date:</span>
+                        <span className="text-gray-600 dark:text-gray-400">Travel Date:</span>
                         <span className="font-medium">{date ? format(date, 'PPP') : '-'}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Duration:</span>
+                        <span className="text-gray-600 dark:text-gray-400">Duration:</span>
                         <span className="font-medium">{selectedDestination?.duration} days</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Travelers:</span>
+                        <span className="text-gray-600 dark:text-gray-400">Travelers:</span>
                         <span className="font-medium">{travelers}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Booking Reference:</span>
-                        <span className="font-medium">TP-{Math.floor(Math.random() * 1000000)}</span>
+                        <span className="text-gray-600 dark:text-gray-400">Booking Reference:</span>
+                        <span className="font-medium">{bookingReference}</span>
                       </div>
                     </div>
                   </div>
@@ -590,8 +534,8 @@ const PlanTrip = () => {
                       <Button onClick={handlePrint} variant="outline">
                         Print Ticket
                       </Button>
-                      <Button onClick={() => window.location.href = '/'}>
-                        Return to Home
+                      <Button onClick={() => navigate('/dashboard')} className="bg-travel-blue-bright hover:bg-travel-blue-bright/90">
+                        View Dashboard
                       </Button>
                     </div>
                   </div>
