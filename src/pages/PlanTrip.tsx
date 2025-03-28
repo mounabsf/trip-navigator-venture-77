@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -7,7 +6,7 @@ import Footer from '@/components/Footer';
 import { useAuth } from '@/context/AuthContext';
 import { getDestinations, createReservation, Destination } from '@/services/api';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, Map } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import TripDetails from '@/components/trip/TripDetails';
 import TripItinerary from '@/components/trip/TripItinerary';
@@ -69,6 +68,7 @@ const PlanTrip = () => {
       const found = destinationsResponse.data.find(d => d.id === parseInt(destinationId));
       if (found) {
         setSelectedDestination(found);
+        console.log("Selected destination:", found);
       }
     }
   }, [destinationId, destinationsResponse]);
@@ -81,9 +81,11 @@ const PlanTrip = () => {
 
   const handleDestinationChange = (value: string) => {
     if (destinationsResponse?.data) {
-      const dest = destinationsResponse.data.find(d => d.id === parseInt(value));
+      const destId = parseInt(value);
+      const dest = destinationsResponse.data.find(d => d.id === destId);
       setSelectedDestination(dest || null);
       setItinerary([]);
+      console.log("Destination changed to:", dest);
     }
   };
 
@@ -213,7 +215,7 @@ const PlanTrip = () => {
                 
                 <TabsContent value="details">
                   <TripDetails 
-                    destinations={destinationsResponse?.data}
+                    destinations={destinationsResponse?.data || []}
                     selectedDestination={selectedDestination}
                     date={date}
                     travelers={travelers}

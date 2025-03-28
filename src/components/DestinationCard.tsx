@@ -1,9 +1,6 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { MapPin, Clock, BadgeDollarSign, Eye } from 'lucide-react';
 
 export interface Destination {
   id: number;
@@ -16,75 +13,64 @@ export interface Destination {
 }
 
 interface DestinationCardProps {
-  id: number;
-  name: string;
-  location: string;
-  image: string;
-  price: number;
-  duration: number;
-  destination?: Destination; // Optional, for backward compatibility
+  id?: number;
+  name?: string;
+  location?: string;
+  image?: string;
+  price?: number;
+  duration?: number;
+  destination?: Destination;
 }
 
-const DestinationCard: React.FC<DestinationCardProps> = ({
-  id,
-  name,
-  location,
-  image,
-  price,
+const DestinationCard: React.FC<DestinationCardProps> = ({ 
+  id, 
+  name, 
+  location, 
+  image, 
+  price, 
   duration,
-  destination,
+  destination 
 }) => {
-  // If a destination object is provided, use its properties instead
-  const actualId = destination?.id ?? id;
-  const actualName = destination?.name ?? name;
-  const actualLocation = destination?.location ?? location;
-  const actualImage = destination?.image ?? image;
-  const actualPrice = destination?.price ?? price;
-  const actualDuration = destination?.duration ?? duration;
+  // Use individual props if provided, otherwise use destination object
+  const destId = id || destination?.id;
+  const destName = name || destination?.name;
+  const destLocation = location || destination?.location;
+  const destImage = image || destination?.image;
+  const destPrice = price || destination?.price;
+  const destDuration = duration || destination?.duration;
 
   return (
-    <Card className="overflow-hidden card-hover">
-      <div className="relative h-48">
+    <div className="rounded-lg overflow-hidden shadow-lg bg-card card-hover">
+      <div className="relative">
         <img
-          src={actualImage}
-          alt={actualName}
-          className="w-full h-full object-cover"
+          src={destImage}
+          alt={destName}
+          className="w-full h-48 object-cover"
         />
+        <div className="absolute top-0 right-0 bg-secondary text-secondary-foreground px-3 py-1 m-2 rounded-md text-sm font-semibold">
+          {destDuration} days
+        </div>
       </div>
-      <CardContent className="p-4">
-        <h3 className="font-semibold text-lg mb-1">{actualName}</h3>
-        <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-3">
-          <MapPin className="h-4 w-4 mr-1" />
-          {actualLocation}
-        </div>
-        <div className="flex flex-wrap gap-4">
-          <div className="flex items-center text-sm">
-            <Clock className="h-4 w-4 mr-1 text-travel-orange" />
-            <span>{actualDuration} days</span>
+
+      <div className="p-5">
+        <h3 className="text-lg font-bold mb-1">{destName}</h3>
+        <p className="text-muted-foreground text-sm mb-4">{destLocation}</p>
+        
+        <div className="flex justify-between items-center">
+          <div>
+            <p className="text-primary font-bold text-lg">${destPrice}</p>
+            <p className="text-xs text-muted-foreground">per person</p>
           </div>
-          <div className="flex items-center text-sm">
-            <BadgeDollarSign className="h-4 w-4 mr-1 text-travel-blue-bright" />
-            <span>${actualPrice}</span>
-          </div>
-        </div>
-      </CardContent>
-      <CardFooter className="p-4 pt-0 flex gap-2">
-        <Link to={`/trip/${actualId}`} className="flex-1">
-          <Button 
-            variant="outline" 
-            className="w-full border-travel-blue-bright text-travel-blue-bright hover:bg-travel-blue hover:bg-opacity-10"
+          
+          <Link 
+            to={`/trip/${destId}`} 
+            className="bg-primary hover:bg-primary/90 text-white px-4 py-2 rounded-md text-sm transition-colors"
           >
-            <Eye className="mr-2 h-4 w-4" />
             View Details
-          </Button>
-        </Link>
-        <Link to={`/plan?destination=${actualId}`} className="flex-1">
-          <Button className="w-full bg-travel-blue-bright hover:bg-travel-blue-bright/90">
-            Book Now
-          </Button>
-        </Link>
-      </CardFooter>
-    </Card>
+          </Link>
+        </div>
+      </div>
+    </div>
   );
 };
 

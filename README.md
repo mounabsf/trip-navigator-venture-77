@@ -3,42 +3,86 @@
 
 A full-stack travel planning application built with React, TypeScript, and PHP.
 
-## Running the Application
+## Running the Application with XAMPP
 
 ### Prerequisites
 
-- Node.js (v14 or newer)
-- PHP (v7.4 or newer)
-- MySQL or MariaDB
-- A web server like Apache or Nginx
+- [XAMPP](https://www.apachefriends.org/download.html) (for PHP, MySQL, and Apache)
+- [Node.js](https://nodejs.org/) (v14 or newer)
+
+### Backend Setup (XAMPP)
+
+1. **Start XAMPP**
+   - Open XAMPP Control Panel
+   - Start Apache and MySQL services
+
+2. **Database Setup**
+   - Open phpMyAdmin (http://localhost/phpmyadmin)
+   - Create a new database named `travel_planner`
+   - Import the database schema from `db/travel_planner.sql`:
+     - Click on your `travel_planner` database
+     - Go to "Import" tab
+     - Choose the file `db/travel_planner.sql`
+     - Click "Go" to import
+
+3. **API Setup**
+   - Copy the entire `api` folder to your XAMPP htdocs directory:
+     - Windows: `C:\xampp\htdocs\travel_planner\api\`
+     - Mac: `/Applications/XAMPP/htdocs/travel_planner/api/`
+     - Linux: `/opt/lampp/htdocs/travel_planner/api/`
+   
+   - Make sure the API is accessible at: `http://localhost/travel_planner/api/`
+
+4. **Configure Database Connection**
+   - Check `api/config/database.php` and ensure it has the correct MySQL credentials:
+     ```php
+     define('DB_HOST', 'localhost');
+     define('DB_NAME', 'travel_planner');
+     define('DB_USER', 'root');  // Default XAMPP MySQL username
+     define('DB_PASS', '');      // Default XAMPP MySQL password (usually empty)
+     ```
 
 ### Frontend Setup
 
-1. Clone the repository
-2. Install dependencies:
-```bash
-npm install
-```
-3. Start the development server:
-```bash
-npm run dev
-```
-4. The frontend will be available at `http://localhost:5173` (or the port shown in your terminal)
+1. **Install Dependencies**
+   ```bash
+   npm install
+   ```
 
-### Backend Setup
+2. **Start Development Server**
+   ```bash
+   npm run dev
+   ```
 
-1. Make sure your web server (Apache/Nginx) is running
-2. Import the database schema:
-```bash
-mysql -u your_username -p your_database_name < db/travel_planner.sql
-```
-3. Configure your database connection in `api/config/database.php`
-4. Place the `api` folder in your web server's document root (or create a virtual host pointing to it)
-5. The API endpoints will be available at `http://localhost/travel_planner/api/` (adjust based on your server configuration)
+3. **Access the Application**
+   - The frontend will be available at: `http://localhost:5173` (or the port shown in your terminal)
+   - Make sure `src/services/api.ts` has the correct API URL:
+     ```typescript
+     const API_URL = 'http://localhost/travel_planner/api';
+     ```
 
-### Connecting Frontend to Backend
+## Troubleshooting
 
-The frontend is configured to connect to the backend at `http://localhost/travel_planner/api`. If your backend is at a different location, update the `API_URL` constant in `src/services/api.ts`.
+### Common Issues
+
+1. **API Connection Issues**
+   - Ensure Apache is running in XAMPP
+   - Verify the API URL in `src/services/api.ts`
+   - Check CORS headers in PHP files
+
+2. **Database Connection Issues**
+   - Verify MySQL is running in XAMPP
+   - Check database credentials in `api/config/database.php`
+   - Ensure the database `travel_planner` exists
+
+3. **Missing Destinations**
+   - Make sure the `travel_plans` table was properly imported
+   - Check the PHP error logs in XAMPP
+
+4. **PHP Errors**
+   - Check XAMPP error logs at:
+     - Windows: `C:\xampp\php\logs\php_error_log`
+     - Mac/Linux: `/Applications/XAMPP/logs/php_error_log`
 
 ## Features
 
@@ -48,25 +92,3 @@ The frontend is configured to connect to the backend at `http://localhost/travel
 - Book trips with a simple reservation system
 - User authentication and profile management
 - View and manage trip reservations
-
-## Project Structure
-
-- `/src`: Frontend React application
-  - `/components`: Reusable UI components
-  - `/pages`: Main application pages
-  - `/services`: API communication
-  - `/context`: Application state management
-- `/api`: Backend PHP application
-  - `/auth`: Authentication endpoints
-  - `/trips`: Trip and destination endpoints
-  - `/user`: User profile and reservation endpoints
-  - `/config`: Server configuration
-- `/db`: Database schema and setup scripts
-
-## Development
-
-To work on both frontend and backend simultaneously:
-
-1. Run the frontend development server with `npm run dev`
-2. Configure your local web server to serve the PHP backend
-3. Make API calls from the frontend to your local backend server
