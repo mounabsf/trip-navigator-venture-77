@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -13,6 +12,7 @@ import TripDetails from '@/components/trip/TripDetails';
 import TripItinerary from '@/components/trip/TripItinerary';
 import TripReservation from '@/components/trip/TripReservation';
 import TripConfirmation from '@/components/trip/TripConfirmation';
+import { format } from 'date-fns';
 
 type ActivityType = "sightseeing" | "culture" | "food" | "outdoor" | "relaxation";
 
@@ -58,13 +58,11 @@ const PlanTrip = () => {
   const [currentTab, setCurrentTab] = useState('details');
   const [bookingReference, setBookingReference] = useState('');
 
-  // Fetch destinations data
   const { data: destinationsResponse, isLoading, isError } = useQuery({
     queryKey: ['destinations'],
     queryFn: getDestinations
   });
 
-  // Set a destination if one was passed in the URL
   useEffect(() => {
     if (destinationId && destinationsResponse?.data) {
       const found = destinationsResponse.data.find(d => d.id === parseInt(destinationId));
@@ -74,7 +72,6 @@ const PlanTrip = () => {
     }
   }, [destinationId, destinationsResponse]);
 
-  // Calculate total price when destination or travelers change
   useEffect(() => {
     if (selectedDestination) {
       setTotalPrice(selectedDestination.price * parseInt(travelers || '1'));
