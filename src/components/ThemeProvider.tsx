@@ -15,7 +15,7 @@ type ThemeProviderState = {
 };
 
 const initialState: ThemeProviderState = {
-  theme: "system",
+  theme: "dark",
   setTheme: () => null,
 };
 
@@ -23,7 +23,7 @@ const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
 
 export function ThemeProvider({
   children,
-  defaultTheme = "system",
+  defaultTheme = "dark", // Changed from "system" to "dark"
   storageKey = "travel-planner-theme",
   ...props
 }: ThemeProviderProps) {
@@ -35,18 +35,8 @@ export function ThemeProvider({
     const root = window.document.documentElement;
     
     root.classList.remove("light", "dark");
+    root.classList.add("dark"); // Always add dark class
     
-    if (theme === "system") {
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-        .matches
-        ? "dark"
-        : "light";
-      
-      root.classList.add(systemTheme);
-      return;
-    }
-    
-    root.classList.add(theme);
   }, [theme]);
 
   const value = {

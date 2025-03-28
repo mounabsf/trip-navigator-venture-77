@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Globe, Menu, X, User, LogOut } from 'lucide-react';
-import { ThemeToggle } from './ThemeToggle';
 import { useAuth } from '@/context/AuthContext';
 
 const Navbar = () => {
@@ -39,14 +38,11 @@ const Navbar = () => {
               Plan Trip
             </Link>
             
-            <ThemeToggle />
-            
             {user ? (
               <div className="flex items-center space-x-2">
-                <Button variant="ghost" className="text-foreground hover:bg-muted">
-                  <User className="mr-2 h-4 w-4" />
-                  {user.name}
-                </Button>
+                <Link to="/dashboard" className="px-3 py-2 text-sm font-medium text-foreground hover:text-travel-blue-bright">
+                  My Trips
+                </Link>
                 <Button 
                   variant="outline" 
                   onClick={handleLogout}
@@ -73,8 +69,7 @@ const Navbar = () => {
             )}
           </div>
           
-          <div className="flex md:hidden items-center space-x-2">
-            <ThemeToggle />
+          <div className="flex md:hidden items-center">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="inline-flex items-center justify-center p-2 rounded-md text-foreground hover:text-foreground hover:bg-muted focus:outline-none"
@@ -114,6 +109,16 @@ const Navbar = () => {
             >
               Plan Trip
             </Link>
+            
+            {user && (
+              <Link
+                to="/dashboard"
+                className="block px-3 py-2 rounded-md text-base font-medium text-foreground hover:text-travel-blue-bright hover:bg-muted"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                My Trips
+              </Link>
+            )}
             
             {user ? (
               <div className="pt-4 pb-3 border-t border-border">

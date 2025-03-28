@@ -1,69 +1,51 @@
-# Welcome to your Lovable project
 
-## Project info
+# Travel Planner Application
 
-**URL**: https://lovable.dev/projects/cd527b25-0d94-4a20-8859-eceb51e0de18
+A full-stack travel planning application with booking system.
 
-## How can I edit this code?
+## Frontend Setup
 
-There are several ways of editing your application.
+1. Clone the repository
+2. Install dependencies:
+   ```
+   npm install
+   ```
+3. Start the development server:
+   ```
+   npm run dev
+   ```
 
-**Use Lovable**
+## Backend Setup
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/cd527b25-0d94-4a20-8859-eceb51e0de18) and start prompting.
+1. Install XAMPP from https://www.apachefriends.org/
+2. Start Apache and MySQL from the XAMPP Control Panel
+3. Import the database schema:
+   - Open http://localhost/phpmyadmin in your browser
+   - Create a new database called `travel_planner`
+   - Click on the "Import" tab
+   - Select the file `db/travel_planner.sql` from the project directory
+   - Click "Go" to import the schema
 
-Changes made via Lovable will be committed automatically to this repo.
+4. Configure the PHP backend:
+   - Copy the `api` folder to your XAMPP htdocs directory (usually located at `C:\xampp\htdocs\` on Windows or `/Applications/XAMPP/htdocs/` on Mac)
+   - The API will be accessible at http://localhost/travel_planner/api/
 
-**Use your preferred IDE**
+## Features
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- User authentication (login/signup)
+- Browse travel destinations
+- View detailed trip information
+- Plan custom itineraries
+- Book trips with payment processing
+- View your booked trips in dashboard
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## Credit Card Testing
 
-Follow these steps:
+For testing the booking system, use any 16-digit card number, any future expiry date in MM/YY format, and any 3-digit CVV. All payments will be accepted in this demo version.
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## API Endpoints
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with .
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/cd527b25-0d94-4a20-8859-eceb51e0de18) and click on Share -> Publish.
-
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+- Authentication: `/api/auth/`
+- Destinations: `/api/trips/`
+- Reservations: `/api/trips/book.php`
+- User profile: `/api/user/`
