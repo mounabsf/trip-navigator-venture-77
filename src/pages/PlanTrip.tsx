@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -79,9 +80,11 @@ const PlanTrip = () => {
   }, [selectedDestination, travelers]);
 
   const handleDestinationChange = (value: string) => {
-    const dest = destinationsResponse?.data?.find(d => d.id === parseInt(value));
-    setSelectedDestination(dest || null);
-    setItinerary([]);
+    if (destinationsResponse?.data) {
+      const dest = destinationsResponse.data.find(d => d.id === parseInt(value));
+      setSelectedDestination(dest || null);
+      setItinerary([]);
+    }
   };
 
   const handleDateChange = (newDate: Date | undefined) => {

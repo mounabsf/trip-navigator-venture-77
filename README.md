@@ -1,51 +1,72 @@
 
 # Travel Planner Application
 
-A full-stack travel planning application with booking system.
+A full-stack travel planning application built with React, TypeScript, and PHP.
 
-## Frontend Setup
+## Running the Application
+
+### Prerequisites
+
+- Node.js (v14 or newer)
+- PHP (v7.4 or newer)
+- MySQL or MariaDB
+- A web server like Apache or Nginx
+
+### Frontend Setup
 
 1. Clone the repository
 2. Install dependencies:
-   ```
-   npm install
-   ```
+```bash
+npm install
+```
 3. Start the development server:
-   ```
-   npm run dev
-   ```
+```bash
+npm run dev
+```
+4. The frontend will be available at `http://localhost:5173` (or the port shown in your terminal)
 
-## Backend Setup
+### Backend Setup
 
-1. Install XAMPP from https://www.apachefriends.org/
-2. Start Apache and MySQL from the XAMPP Control Panel
-3. Import the database schema:
-   - Open http://localhost/phpmyadmin in your browser
-   - Create a new database called `travel_planner`
-   - Click on the "Import" tab
-   - Select the file `db/travel_planner.sql` from the project directory
-   - Click "Go" to import the schema
+1. Make sure your web server (Apache/Nginx) is running
+2. Import the database schema:
+```bash
+mysql -u your_username -p your_database_name < db/travel_planner.sql
+```
+3. Configure your database connection in `api/config/database.php`
+4. Place the `api` folder in your web server's document root (or create a virtual host pointing to it)
+5. The API endpoints will be available at `http://localhost/travel_planner/api/` (adjust based on your server configuration)
 
-4. Configure the PHP backend:
-   - Copy the `api` folder to your XAMPP htdocs directory (usually located at `C:\xampp\htdocs\` on Windows or `/Applications/XAMPP/htdocs/` on Mac)
-   - The API will be accessible at http://localhost/travel_planner/api/
+### Connecting Frontend to Backend
+
+The frontend is configured to connect to the backend at `http://localhost/travel_planner/api`. If your backend is at a different location, update the `API_URL` constant in `src/services/api.ts`.
 
 ## Features
 
-- User authentication (login/signup)
-- Browse travel destinations
-- View detailed trip information
-- Plan custom itineraries
-- Book trips with payment processing
-- View your booked trips in dashboard
+- Browse popular travel destinations
+- View detailed information about destinations
+- Plan customized trips with generated itineraries
+- Book trips with a simple reservation system
+- User authentication and profile management
+- View and manage trip reservations
 
-## Credit Card Testing
+## Project Structure
 
-For testing the booking system, use any 16-digit card number, any future expiry date in MM/YY format, and any 3-digit CVV. All payments will be accepted in this demo version.
+- `/src`: Frontend React application
+  - `/components`: Reusable UI components
+  - `/pages`: Main application pages
+  - `/services`: API communication
+  - `/context`: Application state management
+- `/api`: Backend PHP application
+  - `/auth`: Authentication endpoints
+  - `/trips`: Trip and destination endpoints
+  - `/user`: User profile and reservation endpoints
+  - `/config`: Server configuration
+- `/db`: Database schema and setup scripts
 
-## API Endpoints
+## Development
 
-- Authentication: `/api/auth/`
-- Destinations: `/api/trips/`
-- Reservations: `/api/trips/book.php`
-- User profile: `/api/user/`
+To work on both frontend and backend simultaneously:
+
+1. Run the frontend development server with `npm run dev`
+2. Configure your local web server to serve the PHP backend
+3. Make API calls from the frontend to your local backend server
