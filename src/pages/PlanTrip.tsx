@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -69,6 +70,9 @@ const PlanTrip = () => {
       if (found) {
         setSelectedDestination(found);
         console.log("Selected destination:", found);
+      } else {
+        console.log("Destination not found for id:", destinationId);
+        console.log("Available destinations:", destinationsResponse.data);
       }
     }
   }, [destinationId, destinationsResponse]);

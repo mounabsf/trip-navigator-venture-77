@@ -63,6 +63,34 @@
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
 }
 
+.travel-orange {
+  color: #FFA500;
+}
+
+.travel-blue-bright {
+  color: #00A8E8;
+}
+
+.travel-teal {
+  color: #00CED1;
+}
+
+.text-travel-orange {
+  color: #FFA500;
+}
+
+.text-travel-blue-bright {
+  color: #00A8E8;
+}
+
+.text-travel-teal {
+  color: #00CED1;
+}
+
+.bg-travel-blue-bright {
+  background-color: #00A8E8;
+}
+
 @media print {
   nav, footer, button {
     display: none !important;

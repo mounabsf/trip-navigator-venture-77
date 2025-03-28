@@ -24,6 +24,10 @@ const TripDetails = () => {
       const found = destinationsResponse.data.find(d => d.id === parseInt(id));
       if (found) {
         setDestination(found);
+        console.log("Found destination:", found);
+      } else {
+        console.log("Destination not found for id:", id);
+        console.log("Available destinations:", destinationsResponse.data);
       }
     }
   }, [id, destinationsResponse]);
