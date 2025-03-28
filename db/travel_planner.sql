@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS reservations (
     num_people INT NOT NULL,
     total_price DECIMAL(10,2) NOT NULL,
     status ENUM('confirmed', 'cancelled', 'completed') DEFAULT 'confirmed',
+    booking_reference VARCHAR(20) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (travel_plan_id) REFERENCES travel_plans(id)

@@ -9,14 +9,14 @@ import { useAuth } from '@/context/AuthContext';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { toast } from 'sonner';
+import { Calendar, User, LogOut } from 'lucide-react';
 
 const Profile = () => {
-  const { user, logout, updateProfile } = useAuth();
+  const { user, logout, updateProfile, isLoading } = useAuth();
   const navigate = useNavigate();
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
   const [password, setPassword] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -33,16 +33,15 @@ const Profile = () => {
       return;
     }
     
-    setIsSubmitting(true);
-    
     try {
       const success = await updateProfile(name, email, password || undefined);
       
       if (success) {
         setPassword('');
+        toast.success('Profile updated successfully');
       }
-    } finally {
-      setIsSubmitting(false);
+    } catch (error) {
+      toast.error('Failed to update profile');
     }
   };
 
@@ -109,19 +108,27 @@ const Profile = () => {
                 className="w-full bg-travel-blue-bright hover:bg-travel-blue-bright/90"
                 onClick={goToDashboard}
               >
+                <Calendar className="mr-2 h-4 w-4" />
                 View My Trips
               </Button>
             </CardContent>
             <CardFooter className="flex justify-between">
-              <Button variant="outline" type="button" onClick={handleLogout}>
+              <Button 
+                variant="outline" 
+                type="button" 
+                onClick={handleLogout}
+                className="flex items-center"
+              >
+                <LogOut className="mr-2 h-4 w-4" />
                 Logout
               </Button>
               <Button 
                 type="submit" 
-                className="bg-travel-blue-bright hover:bg-travel-blue-bright/90"
-                disabled={isSubmitting}
+                className="bg-travel-blue-bright hover:bg-travel-blue-bright/90 flex items-center"
+                disabled={isLoading}
               >
-                {isSubmitting ? 'Saving...' : 'Save Changes'}
+                <User className="mr-2 h-4 w-4" />
+                {isLoading ? 'Saving...' : 'Save Changes'}
               </Button>
             </CardFooter>
           </form>

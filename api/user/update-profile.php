@@ -15,37 +15,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     if (!empty($data->userId) && !empty($data->name) && !empty($data->email)) {
         // Sanitize input
-        $userId = htmlspecialchars(strip_tags($data->userId));
+        $userId = (int)$data->userId;
         $name = htmlspecialchars(strip_tags($data->name));
         $email = htmlspecialchars(strip_tags($data->email));
         
         // Get database connection
         $conn = getConnection();
         
-        // Check if email already exists for another user
-        $checkQuery = "SELECT id FROM users WHERE email = ? AND id != ?";
-        $checkStmt = $conn->prepare($checkQuery);
-        $checkStmt->execute([$email, $userId]);
+        // Check if the email is already taken by another user
+        $emailCheckQuery = "SELECT id FROM users WHERE email = ? AND id != ?";
+        $emailCheckStmt = $conn->prepare($emailCheckQuery);
+        $emailCheckStmt->execute([$email, $userId]);
         
-        if ($checkStmt->rowCount() > 0) {
-            echo json_encode(["success" => false, "message" => "Email already in use by another user"]);
+        if ($emailCheckStmt->rowCount() > 0) {
+            echo json_encode(["success" => false, "message" => "Email is already taken by another user"]);
             exit();
         }
         
-        // Create the query based on whether password is being updated
+        // If password is provided, update it too
         if (!empty($data->password)) {
             $password_hash = password_hash($data->password, PASSWORD_DEFAULT);
-            $query = "UPDATE users SET name = ?, email = ?, password_hash = ? WHERE id = ?";
-            $params = [$name, $email, $password_hash, $userId];
+            $updateQuery = "UPDATE users SET name = ?, email = ?, password_hash = ? WHERE id = ?";
+            $updateStmt = $conn->prepare($updateQuery);
+            $updateResult = $updateStmt->execute([$name, $email, $password_hash, $userId]);
         } else {
-            $query = "UPDATE users SET name = ?, email = ? WHERE id = ?";
-            $params = [$name, $email, $userId];
+            $updateQuery = "UPDATE users SET name = ?, email = ? WHERE id = ?";
+            $updateStmt = $conn->prepare($updateQuery);
+            $updateResult = $updateStmt->execute([$name, $email, $userId]);
         }
         
-        // Prepare and execute the statement
-        $stmt = $conn->prepare($query);
-        
-        if ($stmt->execute($params)) {
+        if ($updateResult) {
             echo json_encode([
                 "success" => true,
                 "message" => "Profile updated successfully",

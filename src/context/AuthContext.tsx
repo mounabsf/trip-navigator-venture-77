@@ -6,10 +6,10 @@ import { toast } from 'sonner';
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  isLoading: boolean; // Added isLoading property
+  isLoading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
   register: (name: string, email: string, password: string) => Promise<boolean>;
-  signup: (name: string, email: string, password: string) => Promise<boolean>; // Added signup alias for register
+  signup: (name: string, email: string, password: string) => Promise<boolean>;
   logout: () => void;
   updateProfile: (name: string, email: string, password?: string) => Promise<boolean>;
 }
@@ -113,10 +113,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     <AuthContext.Provider value={{ 
       user, 
       loading, 
-      isLoading: loading, // Expose loading state as isLoading
+      isLoading: loading,
       login, 
       register,
-      signup: register, // Add signup as an alias for register
+      signup: register,
       logout, 
       updateProfile 
     }}>
