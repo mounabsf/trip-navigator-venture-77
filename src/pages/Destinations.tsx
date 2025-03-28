@@ -253,7 +253,15 @@ const Destinations = () => {
           {filteredDestinations.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredDestinations.map(destination => (
-                <DestinationCard key={destination.id} destination={destination} />
+                <DestinationCard 
+                  key={destination.id}
+                  id={destination.id}
+                  name={destination.name}
+                  location={destination.location}
+                  image={destination.image}
+                  price={destination.price}
+                  duration={destination.duration}
+                />
               ))}
             </div>
           ) : (

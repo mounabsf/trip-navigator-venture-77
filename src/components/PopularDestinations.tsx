@@ -89,7 +89,14 @@ const PopularDestinations = () => {
               className={`destination-card ${animatedItems.includes(destination.id) ? 'animate-fade-in' : 'opacity-0'}`}
               style={{ animationDelay: `${index * 0.1}s` }}
             >
-              <DestinationCard destination={destination} />
+              <DestinationCard 
+                id={destination.id}
+                name={destination.name}
+                location={destination.location}
+                image={destination.image}
+                price={destination.price}
+                duration={destination.duration}
+              />
             </div>
           ))}
         </div>
