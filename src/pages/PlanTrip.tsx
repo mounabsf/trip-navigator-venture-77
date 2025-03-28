@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -12,7 +11,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { format } from 'date-fns';
-import { CalendarIcon, Users, TicketCheck, Clock, Map, MapPin, Plane, Hotel, Coffee, Camera } from 'lucide-react';
+import { CalendarIcon, Users, TicketCheck, Clock, Map, MapPin, Plane, Hotel, Coffee, Camera, BadgeDollarSign } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface Destination {
@@ -25,7 +24,6 @@ interface Destination {
   location: string;
 }
 
-// Same destinations as in the destinations page
 const allDestinations: Destination[] = [
   {
     id: 1,
@@ -137,10 +135,8 @@ const allDestinations: Destination[] = [
   }
 ];
 
-// Activity types for generating itineraries
 type ActivityType = "sightseeing" | "culture" | "food" | "outdoor" | "relaxation";
 
-// Sample activities for different destinations
 const destinationActivities: Record<string, Record<ActivityType, string[]>> = {
   "Paris": {
     sightseeing: ["Visit the Eiffel Tower", "Explore the Louvre Museum", "See Notre Dame Cathedral", "Walk along the Champs-Élysées", "Visit Arc de Triomphe"],
@@ -158,7 +154,6 @@ const destinationActivities: Record<string, Record<ActivityType, string[]>> = {
   }
 };
 
-// Generic activities for destinations without specific entries
 const genericActivities: Record<ActivityType, string[]> = {
   sightseeing: ["Visit the main tourist attractions", "Explore historic landmarks", "Tour the city center", "Visit local museums", "See famous architecture"],
   culture: ["Attend a local performance", "Visit art galleries", "Explore cultural districts", "Learn about local traditions", "Visit heritage sites"],
@@ -181,7 +176,6 @@ const PlanTrip = () => {
   const [totalPrice, setTotalPrice] = useState(0);
   const [currentTab, setCurrentTab] = useState('details');
 
-  // Set the default destination if provided in URL
   useEffect(() => {
     if (destinationId) {
       const found = allDestinations.find(d => d.id === parseInt(destinationId));
@@ -191,14 +185,12 @@ const PlanTrip = () => {
     }
   }, [destinationId]);
 
-  // Calculate total price whenever destination or travelers change
   useEffect(() => {
     if (selectedDestination) {
       setTotalPrice(selectedDestination.price * parseInt(travelers || '1'));
     }
   }, [selectedDestination, travelers]);
 
-  // Generate an itinerary based on the selected destination
   const generateItinerary = () => {
     if (!selectedDestination || !date) {
       toast.error('Please select a destination and date first');
@@ -208,24 +200,19 @@ const PlanTrip = () => {
     const days = selectedDestination.duration;
     const newItinerary: string[][] = [];
     
-    // Get destination-specific activities or use generic ones
     const activities = destinationActivities[selectedDestination.name] || genericActivities;
     
-    // Create an itinerary for each day
     for (let i = 0; i < days; i++) {
       const dayActivities: string[] = [];
       
-      // Morning activity (sightseeing or culture)
       const morningType = Math.random() > 0.5 ? 'sightseeing' : 'culture';
       const morningActivities = activities[morningType];
       dayActivities.push(morningActivities[Math.floor(Math.random() * morningActivities.length)]);
       
-      // Afternoon activity (food or outdoor)
       const afternoonType = Math.random() > 0.5 ? 'food' : 'outdoor';
       const afternoonActivities = activities[afternoonType];
       dayActivities.push(afternoonActivities[Math.floor(Math.random() * afternoonActivities.length)]);
       
-      // Evening activity (food or relaxation)
       const eveningType = Math.random() > 0.5 ? 'food' : 'relaxation';
       const eveningActivities = activities[eveningType];
       dayActivities.push(eveningActivities[Math.floor(Math.random() * eveningActivities.length)]);
@@ -243,7 +230,6 @@ const PlanTrip = () => {
       return;
     }
     
-    // Generate itinerary if it doesn't exist yet
     if (itinerary.length === 0) {
       generateItinerary();
     }
@@ -252,7 +238,6 @@ const PlanTrip = () => {
   };
 
   const handleReservation = () => {
-    // In a real app, this would submit to the server
     setTimeout(() => {
       setReservationComplete(true);
       toast.success('Your trip has been successfully booked!');
@@ -339,7 +324,7 @@ const PlanTrip = () => {
                                   <span>{selectedDestination.duration} days</span>
                                 </div>
                                 <div className="flex items-center text-sm">
-                                  <DollarSign className="h-4 w-4 mr-1 text-travel-blue-bright" />
+                                  <BadgeDollarSign className="h-4 w-4 mr-1 text-travel-blue-bright" />
                                   <span>${selectedDestination.price} per person</span>
                                 </div>
                               </div>

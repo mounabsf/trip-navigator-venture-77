@@ -1,6 +1,6 @@
 
 import { Button } from '@/components/ui/button';
-import { Airplane, Map, Calendar } from 'lucide-react';
+import { Plane, Map, Calendar } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const Hero = () => {
