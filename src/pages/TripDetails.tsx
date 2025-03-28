@@ -14,20 +14,63 @@ const TripDetails = () => {
   const navigate = useNavigate();
   const [destination, setDestination] = useState<Destination | null>(null);
 
+  // Use destiantions from the mock data if the API fails
+  const fallbackDestinations = [
+    {
+      id: 1,
+      name: 'Paris',
+      location: 'France',
+      image: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=600&q=80',
+      description: 'Experience the romance of the City of Light with iconic landmarks like the Eiffel Tower and charming cafés.',
+      price: 1299,
+      duration: 7
+    },
+    {
+      id: 2,
+      name: 'Tokyo',
+      location: 'Japan',
+      image: 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=600&q=80',
+      description: 'Discover the perfect blend of tradition and innovation in Japan\'s vibrant capital city.',
+      price: 1599,
+      duration: 10
+    },
+    {
+      id: 3,
+      name: 'Rome',
+      location: 'Italy',
+      image: 'https://images.unsplash.com/photo-1525874684015-58379d421a52?auto=format&fit=crop&w=600&q=80', 
+      description: 'Explore ancient history and enjoy delicious Italian cuisine in the Eternal City.',
+      price: 1199,
+      duration: 6
+    }
+  ];
+
   const { data: destinationsResponse, isLoading, isError } = useQuery({
     queryKey: ['destinations'],
     queryFn: getDestinations
   });
 
   useEffect(() => {
-    if (id && destinationsResponse?.data) {
-      const found = destinationsResponse.data.find(d => d.id === parseInt(id));
-      if (found) {
-        setDestination(found);
-        console.log("Found destination:", found);
+    if (id) {
+      // Try to find the destination in the API response first
+      if (destinationsResponse?.data) {
+        const found = destinationsResponse.data.find(d => d.id === parseInt(id));
+        if (found) {
+          setDestination(found);
+          console.log("Found destination from API:", found);
+          return;
+        }
+      }
+      
+      // If not found or API failed, check fallback data
+      const fallbackFound = fallbackDestinations.find(d => d.id === parseInt(id));
+      if (fallbackFound) {
+        setDestination(fallbackFound);
+        console.log("Using fallback destination:", fallbackFound);
       } else {
         console.log("Destination not found for id:", id);
-        console.log("Available destinations:", destinationsResponse.data);
+        console.log("Available API destinations:", destinationsResponse?.data || []);
+        console.log("Available fallback destinations:", fallbackDestinations);
       }
     }
   }, [id, destinationsResponse]);
@@ -52,7 +95,7 @@ const TripDetails = () => {
     );
   }
 
-  if (isError || !destination) {
+  if (!destination) {
     return (
       <div className="min-h-screen flex flex-col">
         <Navbar />

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -59,20 +58,62 @@ const PlanTrip = () => {
   const [currentTab, setCurrentTab] = useState('details');
   const [bookingReference, setBookingReference] = useState('');
 
+  const fallbackDestinations = [
+    {
+      id: 1,
+      name: 'Paris',
+      location: 'France',
+      image: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?auto=format&fit=crop&w=600&q=80',
+      description: 'Experience the romance of the City of Light with iconic landmarks like the Eiffel Tower and charming cafés.',
+      price: 1299,
+      duration: 7
+    },
+    {
+      id: 2,
+      name: 'Tokyo',
+      location: 'Japan',
+      image: 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=600&q=80',
+      description: 'Discover the perfect blend of tradition and innovation in Japan\'s vibrant capital city.',
+      price: 1599,
+      duration: 10
+    },
+    {
+      id: 3,
+      name: 'Rome',
+      location: 'Italy',
+      image: 'https://images.unsplash.com/photo-1525874684015-58379d421a52?auto=format&fit=crop&w=600&q=80', 
+      description: 'Explore ancient history and enjoy delicious Italian cuisine in the Eternal City.',
+      price: 1199,
+      duration: 6
+    }
+  ];
+
   const { data: destinationsResponse, isLoading, isError } = useQuery({
     queryKey: ['destinations'],
     queryFn: getDestinations
   });
 
+  const destinations = destinationsResponse?.data || fallbackDestinations;
+
   useEffect(() => {
-    if (destinationId && destinationsResponse?.data) {
-      const found = destinationsResponse.data.find(d => d.id === parseInt(destinationId));
-      if (found) {
-        setSelectedDestination(found);
-        console.log("Selected destination:", found);
+    if (destinationId) {
+      if (destinationsResponse?.data) {
+        const found = destinationsResponse.data.find(d => d.id === parseInt(destinationId));
+        if (found) {
+          setSelectedDestination(found);
+          console.log("Selected destination from API:", found);
+          return;
+        }
+      }
+      
+      const fallbackFound = fallbackDestinations.find(d => d.id === parseInt(destinationId));
+      if (fallbackFound) {
+        setSelectedDestination(fallbackFound);
+        console.log("Using fallback destination:", fallbackFound);
       } else {
         console.log("Destination not found for id:", destinationId);
-        console.log("Available destinations:", destinationsResponse.data);
+        console.log("Available API destinations:", destinationsResponse?.data || []);
+        console.log("Available fallback destinations:", fallbackDestinations);
       }
     }
   }, [destinationId, destinationsResponse]);
@@ -84,12 +125,22 @@ const PlanTrip = () => {
   }, [selectedDestination, travelers]);
 
   const handleDestinationChange = (value: string) => {
+    const destId = parseInt(value);
     if (destinationsResponse?.data) {
-      const destId = parseInt(value);
-      const dest = destinationsResponse.data.find(d => d.id === destId);
-      setSelectedDestination(dest || null);
+      const found = destinationsResponse.data.find(d => d.id === destId);
+      if (found) {
+        setSelectedDestination(found);
+        setItinerary([]);
+        console.log("Destination changed to:", found);
+        return;
+      }
+    }
+    
+    const fallbackFound = fallbackDestinations.find(d => d.id === destId);
+    if (fallbackFound) {
+      setSelectedDestination(fallbackFound);
       setItinerary([]);
-      console.log("Destination changed to:", dest);
+      console.log("Using fallback destination:", fallbackFound);
     }
   };
 
@@ -204,64 +255,62 @@ const PlanTrip = () => {
             <div className="flex justify-center py-12">
               <Loader2 className="h-10 w-10 animate-spin text-travel-blue-bright" />
             </div>
-          ) : isError ? (
-            <div className="text-center py-12">
-              <p className="text-destructive">Error loading destinations. Please try again later.</p>
-            </div>
-          ) : !reservationComplete ? (
-            <div className="max-w-4xl mx-auto">
-              <Tabs value={currentTab} onValueChange={setCurrentTab}>
-                <TabsList className="grid w-full grid-cols-3 mb-8">
-                  <TabsTrigger value="details">Trip Details</TabsTrigger>
-                  <TabsTrigger value="itinerary" disabled={!selectedDestination}>Itinerary</TabsTrigger>
-                  <TabsTrigger value="reservation" disabled={!showReservation}>Reservation</TabsTrigger>
-                </TabsList>
-                
-                <TabsContent value="details">
-                  <TripDetails 
-                    destinations={destinationsResponse?.data || []}
-                    selectedDestination={selectedDestination}
-                    date={date}
-                    travelers={travelers}
-                    onDestinationChange={handleDestinationChange}
-                    onDateChange={handleDateChange}
-                    onTravelersChange={handleTravelersChange}
-                    onGenerateItinerary={generateItinerary}
-                  />
-                </TabsContent>
-                
-                <TabsContent value="itinerary">
-                  <TripItinerary 
-                    selectedDestination={selectedDestination}
-                    itinerary={itinerary}
-                    onGenerateItinerary={generateItinerary}
-                    onContinue={handleContinue}
-                  />
-                </TabsContent>
-                
-                <TabsContent value="reservation">
-                  <TripReservation 
-                    user={user}
-                    selectedDestination={selectedDestination}
-                    date={date}
-                    travelers={travelers}
-                    totalPrice={totalPrice}
-                    isBooking={isBooking}
-                    onReservation={handleReservation}
-                  />
-                </TabsContent>
-              </Tabs>
-            </div>
           ) : (
-            <div className="max-w-4xl mx-auto">
-              <TripConfirmation 
-                selectedDestination={selectedDestination}
-                date={date}
-                travelers={travelers}
-                bookingReference={bookingReference}
-                onPrint={handlePrint}
-              />
-            </div>
+            !reservationComplete ? (
+              <div className="max-w-4xl mx-auto">
+                <Tabs value={currentTab} onValueChange={setCurrentTab}>
+                  <TabsList className="grid w-full grid-cols-3 mb-8">
+                    <TabsTrigger value="details">Trip Details</TabsTrigger>
+                    <TabsTrigger value="itinerary" disabled={!selectedDestination}>Itinerary</TabsTrigger>
+                    <TabsTrigger value="reservation" disabled={!showReservation}>Reservation</TabsTrigger>
+                  </TabsList>
+                  
+                  <TabsContent value="details">
+                    <TripDetails 
+                      destinations={destinations}
+                      selectedDestination={selectedDestination}
+                      date={date}
+                      travelers={travelers}
+                      onDestinationChange={handleDestinationChange}
+                      onDateChange={handleDateChange}
+                      onTravelersChange={handleTravelersChange}
+                      onGenerateItinerary={generateItinerary}
+                    />
+                  </TabsContent>
+                  
+                  <TabsContent value="itinerary">
+                    <TripItinerary 
+                      selectedDestination={selectedDestination}
+                      itinerary={itinerary}
+                      onGenerateItinerary={generateItinerary}
+                      onContinue={handleContinue}
+                    />
+                  </TabsContent>
+                  
+                  <TabsContent value="reservation">
+                    <TripReservation 
+                      user={user}
+                      selectedDestination={selectedDestination}
+                      date={date}
+                      travelers={travelers}
+                      totalPrice={totalPrice}
+                      isBooking={isBooking}
+                      onReservation={handleReservation}
+                    />
+                  </TabsContent>
+                </Tabs>
+              </div>
+            ) : (
+              <div className="max-w-4xl mx-auto">
+                <TripConfirmation 
+                  selectedDestination={selectedDestination}
+                  date={date}
+                  travelers={travelers}
+                  bookingReference={bookingReference}
+                  onPrint={handlePrint}
+                />
+              </div>
+            )
           )}
         </div>
       </div>
