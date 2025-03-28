@@ -5,8 +5,8 @@ import { Link } from 'react-router-dom';
 
 const Hero = () => {
   return (
-    <div className="relative bg-world-map bg-cover bg-center">
-      <div className="absolute inset-0 bg-black/30"></div>
+    <div className="relative bg-world-map dark:bg-dark-map bg-cover bg-center">
+      <div className="absolute inset-0 bg-black/30 dark:bg-black/50"></div>
       <div className="relative px-4 py-32 sm:px-6 lg:px-8 flex flex-col items-center justify-center text-center">
         <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl animate-fade-in">
           <span className="block">Discover Your Next</span>

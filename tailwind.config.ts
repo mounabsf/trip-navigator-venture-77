@@ -59,6 +59,9 @@ export default {
           orange: '#FEC6A1',
           teal: '#5EEAD4',
           purple: '#E5DEFF',
+          'dark-bg': '#0F172A',
+          'dark-card': '#1E293B',
+          'dark-accent': '#334155'
         },
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
@@ -121,8 +124,10 @@ export default {
       backgroundImage: {
         'world-map': "url('https://images.unsplash.com/photo-1482938289607-e9573fc25ebb?auto=format&fit=crop&w=1920&q=80')",
         'gradient-blue': 'linear-gradient(90deg, hsla(216, 41%, 79%, 1) 0%, hsla(186, 33%, 94%, 1) 100%)',
+        'dark-map': "url('https://images.unsplash.com/photo-1518709766631-a6a7f45921c3?auto=format&fit=crop&w=1920&q=80')",
       }
 		}
 	},
 	plugins: [require("tailwindcss-animate")],
 } satisfies Config;
+
