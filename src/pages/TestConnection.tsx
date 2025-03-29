@@ -1,9 +1,10 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { getDestinations, registerUser } from '@/services/api';
+
+const API_URL = 'http://localhost/travel_planner/api';
 
 const TestConnection = () => {
   const [testResult, setTestResult] = useState<string>('');
@@ -37,7 +38,6 @@ const TestConnection = () => {
     setRegistrationResult('Testing registration...');
     
     try {
-      // Create a test user with unique email based on timestamp
       const testEmail = `test${Date.now()}@example.com`;
       const response = await registerUser('Test User', testEmail, 'password123');
       console.log('Registration Response:', response);
@@ -106,7 +106,7 @@ const TestConnection = () => {
           <ul className="list-disc pl-5 space-y-2">
             <li>Make sure XAMPP is running (Apache and MySQL services)</li>
             <li>Check if your database is properly set up at <code>http://localhost/phpmyadmin</code></li>
-            <li>Make sure API_URL is correct in services/api.ts: <code>{`${API_URL}`}</code></li>
+            <li>Make sure API_URL is correct in services/api.ts: <code>{API_URL}</code></li>
             <li>Check the browser console for any error messages</li>
             <li>Verify that your PHP files are in the correct location in XAMPP htdocs folder</li>
             <li>Check PHP error logs in XAMPP if registration is failing</li>

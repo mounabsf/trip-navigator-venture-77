@@ -1,4 +1,3 @@
-
 // API service for communicating with the backend
 
 // Base URL for API calls
@@ -101,7 +100,7 @@ export const getDestinations = async () => {
   }
 };
 
-export const bookTrip = async (
+export const createReservation = async (
   userId: number,
   destinationId: number,
   travelDate: string,
@@ -130,6 +129,17 @@ export const bookTrip = async (
     console.error('Booking error:', error);
     return { success: false, message: 'Network error occurred' };
   }
+};
+
+export const bookTrip = async (
+  userId: number,
+  destinationId: number,
+  travelDate: string,
+  travelers: number,
+  totalPrice: number,
+  itinerary: string[][]
+) => {
+  return createReservation(userId, destinationId, travelDate, travelers, totalPrice, itinerary);
 };
 
 // User reservations services
