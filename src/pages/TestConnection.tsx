@@ -1,10 +1,14 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { getDestinations, registerUser } from '@/services/api';
+import { toast } from 'sonner';
 
-const API_URL = 'http://localhost/travel_planner/api';
+// This URL should match your EasyPHP setup
+// Default EasyPHP URL is usually http://127.0.0.1/
+const API_URL = 'http://127.0.0.1/travel_planner/api';
 
 const TestConnection = () => {
   const [testResult, setTestResult] = useState<string>('');
@@ -22,12 +26,15 @@ const TestConnection = () => {
       
       if (response.success) {
         setTestResult(`Connection successful! Found ${response.data.length} destinations.`);
+        toast.success('Backend connection successful!');
       } else {
         setTestResult(`Connection failed: ${response.message}`);
+        toast.error('Connection failed');
       }
     } catch (error) {
       console.error('Test error:', error);
       setTestResult(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.error('Connection error');
     } finally {
       setLoading(false);
     }
@@ -44,12 +51,15 @@ const TestConnection = () => {
       
       if (response.success) {
         setRegistrationResult(`Registration successful! User ID: ${response.user.id}`);
+        toast.success('Registration successful!');
       } else {
         setRegistrationResult(`Registration failed: ${response.message}`);
+        toast.error('Registration failed');
       }
     } catch (error) {
       console.error('Registration test error:', error);
       setRegistrationResult(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      toast.error('Registration error');
     } finally {
       setRegLoading(false);
     }
@@ -59,7 +69,7 @@ const TestConnection = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-grow container mx-auto py-12 px-4">
-        <h1 className="text-3xl font-bold mb-8">Backend Connection Test</h1>
+        <h1 className="text-3xl font-bold mb-8">Backend Connection Test (EasyPHP)</h1>
         
         <div className="grid gap-8 md:grid-cols-2">
           <div className="p-6 border rounded-lg">
@@ -102,15 +112,25 @@ const TestConnection = () => {
         </div>
         
         <div className="mt-10 p-6 border rounded-lg">
-          <h2 className="text-xl font-semibold mb-4">Troubleshooting Tips</h2>
+          <h2 className="text-xl font-semibold mb-4">EasyPHP Troubleshooting Tips</h2>
           <ul className="list-disc pl-5 space-y-2">
-            <li>Make sure XAMPP is running (Apache and MySQL services)</li>
-            <li>Check if your database is properly set up at <code>http://localhost/phpmyadmin</code></li>
-            <li>Make sure API_URL is correct in services/api.ts: <code>{API_URL}</code></li>
-            <li>Check the browser console for any error messages</li>
-            <li>Verify that your PHP files are in the correct location in XAMPP htdocs folder</li>
-            <li>Check PHP error logs in XAMPP if registration is failing</li>
+            <li>Make sure EasyPHP is running (check that both HTTP and MySQL servers are active)</li>
+            <li>Check if your database is properly set up at <code>http://127.0.0.1/index.php?option=mysql</code> or <code>http://localhost/index.php?option=mysql</code></li>
+            <li>Verify the API_URL is correct in services/api.ts: <code>{API_URL}</code></li>
+            <li>Current API URL: <code>{API_URL}</code></li>
+            <li>Check the browser console for any error messages (F12)</li>
+            <li>Verify that your PHP files are in the correct location in EasyPHP data/localweb folder</li>
+            <li>Check that the database credentials in api/config/database.php match your EasyPHP setup</li>
           </ul>
+        </div>
+
+        <div className="mt-6 p-6 border rounded-lg">
+          <h2 className="text-xl font-semibold mb-4">Test Account Credentials</h2>
+          <p className="mb-2">Use these credentials for testing after successful registration:</p>
+          <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-md">
+            <p><strong>Email:</strong> test123@example.com</p>
+            <p><strong>Password:</strong> password123</p>
+          </div>
         </div>
       </main>
       <Footer />
