@@ -1,11 +1,10 @@
 
-interface ApiResponse<T> {
-  success: boolean;
-  message?: string;
-  data?: T;
-  user?: User;
-}
+// API service for communicating with the backend
 
+// Base URL for API calls
+const API_URL = 'http://localhost/travel_planner/api';
+
+// User interfaces
 export interface User {
   id: number;
   name: string;
@@ -16,50 +15,25 @@ export interface Destination {
   id: number;
   name: string;
   location: string;
-  image: string;
   description: string;
+  image: string;
   price: number;
   duration: number;
 }
 
 export interface Reservation {
   id: number;
-  destination: {
-    id: number;
-    name: string;
-    location: string;
-    image: string;
-    duration: number;
-  };
+  destination: Destination;
   date: string;
   people: number;
   totalPrice: number;
-  status: 'confirmed' | 'cancelled' | 'completed';
+  status: string;
   bookingReference: string;
   itinerary: string[][];
 }
 
-const API_URL = 'http://localhost/travel_planner/api';
-
-// User Authentication
-export const registerUser = async (name: string, email: string, password: string): Promise<ApiResponse<null>> => {
-  try {
-    const response = await fetch(`${API_URL}/auth/register.php`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ name, email, password }),
-    });
-    
-    return await response.json();
-  } catch (error) {
-    console.error('Register error:', error);
-    return { success: false, message: 'Network error occurred' };
-  }
-};
-
-export const loginUser = async (email: string, password: string): Promise<ApiResponse<null>> => {
+// Auth services
+export const loginUser = async (email: string, password: string) => {
   try {
     const response = await fetch(`${API_URL}/auth/login.php`, {
       method: 'POST',
@@ -76,26 +50,65 @@ export const loginUser = async (email: string, password: string): Promise<ApiRes
   }
 };
 
-// Destinations
-export const getDestinations = async (): Promise<ApiResponse<Destination[]>> => {
+export const registerUser = async (name: string, email: string, password: string) => {
   try {
-    const response = await fetch(`${API_URL}/trips/destinations.php`);
-    return await response.json();
+    const response = await fetch(`${API_URL}/auth/register.php`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ name, email, password }),
+    });
+    
+    const data = await response.json();
+    console.log("Registration response:", data);
+    return data;
   } catch (error) {
-    console.error('Get destinations error:', error);
+    console.error('Registration error:', error);
     return { success: false, message: 'Network error occurred' };
   }
 };
 
-// Reservations
-export const createReservation = async (
+// User profile services
+export const updateUserProfile = async (userId: number, name: string, email: string, password?: string) => {
+  try {
+    const response = await fetch(`${API_URL}/user/update-profile.php`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ userId, name, email, password }),
+    });
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Profile update error:', error);
+    return { success: false, message: 'Network error occurred' };
+  }
+};
+
+// Trip and destination services
+export const getDestinations = async () => {
+  try {
+    console.log("Fetching destinations from:", `${API_URL}/trips/destinations.php`);
+    const response = await fetch(`${API_URL}/trips/destinations.php`);
+    const data = await response.json();
+    console.log("Destinations response:", data);
+    return data;
+  } catch (error) {
+    console.error('Error fetching destinations:', error);
+    return { success: false, message: 'Network error occurred' };
+  }
+};
+
+export const bookTrip = async (
   userId: number,
   destinationId: number,
   travelDate: string,
   travelers: number,
   totalPrice: number,
   itinerary: string[][]
-): Promise<ApiResponse<{ reservationId: number; bookingReference: string }>> => {
+) => {
   try {
     const response = await fetch(`${API_URL}/trips/book.php`, {
       method: 'POST',
@@ -108,28 +121,31 @@ export const createReservation = async (
         travelDate,
         travelers,
         totalPrice,
-        itinerary,
+        itinerary
       }),
     });
     
     return await response.json();
   } catch (error) {
-    console.error('Create reservation error:', error);
+    console.error('Booking error:', error);
     return { success: false, message: 'Network error occurred' };
   }
 };
 
-export const getUserReservations = async (userId: number): Promise<ApiResponse<Reservation[]>> => {
+// User reservations services
+export const getUserReservations = async (userId: number) => {
   try {
     const response = await fetch(`${API_URL}/user/reservations.php?userId=${userId}`);
-    return await response.json();
+    const data = await response.json();
+    console.log("Reservations response:", data);
+    return data;
   } catch (error) {
-    console.error('Get user reservations error:', error);
+    console.error('Error fetching reservations:', error);
     return { success: false, message: 'Network error occurred' };
   }
 };
 
-export const cancelReservation = async (userId: number, reservationId: number): Promise<ApiResponse<null>> => {
+export const cancelReservation = async (userId: number, reservationId: number) => {
   try {
     const response = await fetch(`${API_URL}/user/cancel-reservation.php`, {
       method: 'POST',
@@ -146,30 +162,50 @@ export const cancelReservation = async (userId: number, reservationId: number): 
   }
 };
 
-// User Profile
-export const updateUserProfile = async (
-  userId: number,
-  name: string,
-  email: string,
-  password?: string
-): Promise<ApiResponse<null>> => {
-  try {
-    const response = await fetch(`${API_URL}/user/update-profile.php`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        userId,
-        name,
-        email,
-        ...(password ? { password } : {}),
-      }),
-    });
-    
-    return await response.json();
-  } catch (error) {
-    console.error('Update profile error:', error);
-    return { success: false, message: 'Network error occurred' };
+// Helper: Generate random itinerary for a destination
+export const generateItinerary = (destination: Destination | null) => {
+  if (!destination) return [];
+  
+  const morningActivities = [
+    `Explore the local markets of ${destination.name}`,
+    `Take a guided tour of ${destination.name}'s historic sites`,
+    `Enjoy a relaxing breakfast at a local café`,
+    `Visit the most famous museum in ${destination.name}`,
+    `Take a morning hike with stunning views of ${destination.name}`,
+    `Join a local cooking class to learn ${destination.location} cuisine`,
+  ];
+  
+  const afternoonActivities = [
+    `Visit the main attractions in ${destination.name}`,
+    `Enjoy lunch at a traditional restaurant`,
+    `Take a boat tour around ${destination.name}`,
+    `Relax at a local beach or park`,
+    `Go shopping for local crafts and souvenirs`,
+    `Take a photography tour of the best spots in ${destination.name}`,
+  ];
+  
+  const eveningActivities = [
+    `Experience the nightlife of ${destination.name}`,
+    `Enjoy a dinner with local entertainment`,
+    `Take a sunset walk along famous landmarks`,
+    `Attend a cultural show or concert`,
+    `Try the best local restaurants for dinner`,
+    `Join a night tour of the illuminated city`,
+  ];
+  
+  const getRandomActivity = (activities: string[]) => {
+    return activities[Math.floor(Math.random() * activities.length)];
+  };
+  
+  const itinerary = [];
+  
+  for (let i = 0; i < destination.duration; i++) {
+    itinerary.push([
+      getRandomActivity(morningActivities),
+      getRandomActivity(afternoonActivities),
+      getRandomActivity(eveningActivities)
+    ]);
   }
+  
+  return itinerary;
 };
