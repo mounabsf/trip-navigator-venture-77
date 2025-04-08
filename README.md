@@ -1,94 +1,43 @@
 
-# Travel Planner Application
+# Travelers Planner
 
-A full-stack travel planning application built with React, TypeScript, and PHP.
+A travel planning application that lets users browse destinations, plan trips, and manage reservations.
 
-## Running the Application with XAMPP
+## Setup Instructions
 
-### Prerequisites
+### Database Setup
+1. Start your EasyPHP installation
+2. Open phpMyAdmin (MySQL Administration)
+3. Create a new database called `travelers_planner`
+4. Import the SQL file from `db/travelers_planner.sql`
 
-- [XAMPP](https://www.apachefriends.org/download.html) (for PHP, MySQL, and Apache)
-- [Node.js](https://nodejs.org/) (v14 or newer)
-
-### Backend Setup (XAMPP)
-
-1. **Start XAMPP**
-   - Open XAMPP Control Panel
-   - Start Apache and MySQL services
-
-2. **Database Setup**
-   - Open phpMyAdmin (http://localhost/phpmyadmin)
-   - Create a new database named `travel_planner`
-   - Import the database schema from `db/travel_planner.sql`:
-     - Click on your `travel_planner` database
-     - Go to "Import" tab
-     - Choose the file `db/travel_planner.sql`
-     - Click "Go" to import
-
-3. **API Setup**
-   - Copy the entire `api` folder to your XAMPP htdocs directory:
-     - Windows: `C:\xampp\htdocs\travel_planner\api\`
-     - Mac: `/Applications/XAMPP/htdocs/travel_planner/api/`
-     - Linux: `/opt/lampp/htdocs/travel_planner/api/`
-   
-   - Make sure the API is accessible at: `http://localhost/travel_planner/api/`
-
-4. **Configure Database Connection**
-   - Check `api/config/database.php` and ensure it has the correct MySQL credentials:
-     ```php
-     define('DB_HOST', 'localhost');
-     define('DB_NAME', 'travel_planner');
-     define('DB_USER', 'root');  // Default XAMPP MySQL username
-     define('DB_PASS', '');      // Default XAMPP MySQL password (usually empty)
-     ```
+### Backend Setup
+1. Locate your EasyPHP localweb directory (typically `C:\Program Files (x86)\EasyPHP-Devserver\data\localweb\`)
+2. Create a folder named `travelers_planner`
+3. Copy the `api` folder from this project into the `travelers_planner` folder
+4. Your structure should look like:
+   ```
+   [EasyPHP path]/data/localweb/travelers_planner/api/...
+   ```
+5. Make sure both HTTP and MySQL servers are running in EasyPHP
 
 ### Frontend Setup
-
-1. **Install Dependencies**
-   ```bash
+1. Install dependencies:
+   ```
    npm install
    ```
-
-2. **Start Development Server**
-   ```bash
+2. Start the development server:
+   ```
    npm run dev
    ```
+3. Open your browser and navigate to the URL shown in the terminal (typically http://localhost:5173/)
 
-3. **Access the Application**
-   - The frontend will be available at: `http://localhost:5173` (or the port shown in your terminal)
-   - Make sure `src/services/api.ts` has the correct API URL:
-     ```typescript
-     const API_URL = 'http://localhost/travel_planner/api';
-     ```
+### Testing the Connection
+1. Navigate to the test page at `/test-connection`
+2. Click "Test Connection" to verify database connectivity
+3. Click "Test Registration" to test user creation
 
-## Troubleshooting
+## Default Credentials
+- Email: test123@example.com
+- Password: password123
 
-### Common Issues
-
-1. **API Connection Issues**
-   - Ensure Apache is running in XAMPP
-   - Verify the API URL in `src/services/api.ts`
-   - Check CORS headers in PHP files
-
-2. **Database Connection Issues**
-   - Verify MySQL is running in XAMPP
-   - Check database credentials in `api/config/database.php`
-   - Ensure the database `travel_planner` exists
-
-3. **Missing Destinations**
-   - Make sure the `travel_plans` table was properly imported
-   - Check the PHP error logs in XAMPP
-
-4. **PHP Errors**
-   - Check XAMPP error logs at:
-     - Windows: `C:\xampp\php\logs\php_error_log`
-     - Mac/Linux: `/Applications/XAMPP/logs/php_error_log`
-
-## Features
-
-- Browse popular travel destinations
-- View detailed information about destinations
-- Plan customized trips with generated itineraries
-- Book trips with a simple reservation system
-- User authentication and profile management
-- View and manage trip reservations
