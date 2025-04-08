@@ -2,7 +2,7 @@
 // API service for communicating with the backend
 
 // Base URL for API calls
-const API_URL = 'http://127.0.0.1/travel_planner/api';
+const API_URL = 'http://127.0.0.1/travelers_planner/api';
 
 // User interfaces
 export interface User {
@@ -19,6 +19,8 @@ export interface Destination {
   image: string;
   price: number;
   duration: number;
+  group_type?: string;
+  nb_people?: number;
 }
 
 export interface Reservation {

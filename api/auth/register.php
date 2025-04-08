@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         // Check if email already exists
         $conn = getConnection();
-        $checkStmt = $conn->prepare("SELECT id FROM users WHERE email = ?");
+        $checkStmt = $conn->prepare("SELECT id FROM travelers WHERE email = ?");
         $checkStmt->execute([$email]);
         
         if ($checkStmt->rowCount() > 0) {
@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $password_hash = password_hash($password, PASSWORD_DEFAULT);
         
         // Create the query
-        $query = "INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)";
+        $query = "INSERT INTO travelers (name, email, hashed_password) VALUES (?, ?, ?)";
         
         // Prepare the statement
         $stmt = $conn->prepare($query);

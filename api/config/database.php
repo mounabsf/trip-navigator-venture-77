@@ -2,7 +2,7 @@
 <?php
 // Database configuration
 define('DB_HOST', 'localhost');
-define('DB_NAME', 'travel_planner');
+define('DB_NAME', 'travelers_planner');
 define('DB_USER', 'root');
 define('DB_PASS', '');
 

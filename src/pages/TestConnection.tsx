@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 
 // This URL should match your EasyPHP setup
 // Default EasyPHP URL is usually http://127.0.0.1/
-const API_URL = 'http://127.0.0.1/travel_planner/api';
+const API_URL = 'http://127.0.0.1/travelers_planner/api';
 
 const TestConnection = () => {
   const [testResult, setTestResult] = useState<string>('');
@@ -69,7 +69,7 @@ const TestConnection = () => {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-grow container mx-auto py-12 px-4">
-        <h1 className="text-3xl font-bold mb-8">Backend Connection Test (EasyPHP)</h1>
+        <h1 className="text-3xl font-bold mb-8">Backend Connection Test (Travelers Planner)</h1>
         
         <div className="grid gap-8 md:grid-cols-2">
           <div className="p-6 border rounded-lg">
@@ -112,15 +112,16 @@ const TestConnection = () => {
         </div>
         
         <div className="mt-10 p-6 border rounded-lg">
-          <h2 className="text-xl font-semibold mb-4">EasyPHP Troubleshooting Tips</h2>
+          <h2 className="text-xl font-semibold mb-4">Travelers Planner Database Setup</h2>
           <ul className="list-disc pl-5 space-y-2">
             <li>Make sure EasyPHP is running (check that both HTTP and MySQL servers are active)</li>
-            <li>Check if your database is properly set up at <code>http://127.0.0.1/index.php?option=mysql</code> or <code>http://localhost/index.php?option=mysql</code></li>
+            <li>Create a database called <code>travelers_planner</code> in your MySQL admin panel</li>
+            <li>Import the SQL file <code>db/travelers_planner.sql</code> to set up your database</li>
             <li>Verify the API_URL is correct in services/api.ts: <code>{API_URL}</code></li>
             <li>Current API URL: <code>{API_URL}</code></li>
             <li>Check the browser console for any error messages (F12)</li>
-            <li>Verify that your PHP files are in the correct location in EasyPHP data/localweb folder</li>
-            <li>Check that the database credentials in api/config/database.php match your EasyPHP setup</li>
+            <li>Verify that your PHP files are in <code>data/localweb/travelers_planner/api</code> folder</li>
+            <li>Check that the database credentials in api/config/database.php match your setup</li>
           </ul>
         </div>
 

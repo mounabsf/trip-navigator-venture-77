@@ -8,16 +8,13 @@ header("Content-Type: application/json; charset=UTF-8");
 // Include database connection
 require_once '../config/database.php';
 
-// Function to generate a booking reference
+// Generate a random booking reference
 function generateBookingReference($length = 8) {
-    $characters = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    $characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     $reference = '';
-    $max = strlen($characters) - 1;
-    
     for ($i = 0; $i < $length; $i++) {
-        $reference .= $characters[mt_rand(0, $max)];
+        $reference .= $characters[rand(0, strlen($characters) - 1)];
     }
-    
     return $reference;
 }
 
@@ -30,66 +27,106 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         !empty($data->travelDate) && !empty($data->travelers) && 
         !empty($data->totalPrice) && !empty($data->itinerary)) {
         
-        // Generate booking reference
-        $bookingReference = generateBookingReference();
+        // Get database connection
+        $conn = getConnection();
+        $conn->beginTransaction();
         
         try {
-            // Get database connection
-            $conn = getConnection();
-            $conn->beginTransaction();
+            // First get the destination details to copy for the new plan
+            $destQuery = "SELECT country, city, image_url FROM plans WHERE id = ?";
+            $destStmt = $conn->prepare($destQuery);
+            $destStmt->execute([$data->destinationId]);
+            $destination = $destStmt->fetch(PDO::FETCH_ASSOC);
             
-            // Insert into reservations table
-            $reservationQuery = "INSERT INTO reservations (user_id, travel_plan_id, travel_date, num_people, total_price, status, booking_reference) 
-                               VALUES (?, ?, ?, ?, ?, 'confirmed', ?)";
+            if (!$destination) {
+                throw new Exception("Destination not found");
+            }
             
-            $reservationStmt = $conn->prepare($reservationQuery);
-            $reservationStmt->execute([
+            // Calculate end date based on number of days in itinerary
+            $start_date = new DateTime($data->travelDate);
+            $days = count($data->itinerary);
+            $end_date = clone $start_date;
+            $end_date->modify('+' . ($days - 1) . ' days');
+            
+            // Create new plan
+            $planQuery = "INSERT INTO plans (traveler_id, country, city, image_url, group_type, 
+                           start_date, end_date, nb_people, cost) 
+                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            $planStmt = $conn->prepare($planQuery);
+            $planStmt->execute([
                 $data->userId,
-                $data->destinationId,
-                $data->travelDate,
+                $destination['country'],
+                $destination['city'],
+                $destination['image_url'],
+                'friends', // Default group type
+                $start_date->format('Y-m-d'),
+                $end_date->format('Y-m-d'),
                 $data->travelers,
-                $data->totalPrice,
-                $bookingReference
+                $data->totalPrice
             ]);
             
-            $reservationId = $conn->lastInsertId();
+            $planId = $conn->lastInsertId();
+            $bookingRef = generateBookingReference();
             
-            // Insert itinerary items
-            foreach ($data->itinerary as $dayIndex => $activities) {
-                $dayNumber = $dayIndex + 1;
-                $morningActivity = $activities[0] ?? '';
-                $afternoonActivity = $activities[1] ?? '';
-                $eveningActivity = $activities[2] ?? '';
-                
-                $itineraryQuery = "INSERT INTO itineraries (reservation_id, day_number, morning_activity, afternoon_activity, evening_activity) 
-                                 VALUES (?, ?, ?, ?, ?)";
-                
-                $itineraryStmt = $conn->prepare($itineraryQuery);
-                $itineraryStmt->execute([
-                    $reservationId,
+            // Add days and activities from itinerary
+            foreach ($data->itinerary as $index => $dayActivities) {
+                $dayNumber = $index + 1;
+                $dayQuery = "INSERT INTO days (plan_id, day_number, accommodation, accommodation_cost) 
+                            VALUES (?, ?, ?, ?)";
+                $dayStmt = $conn->prepare($dayQuery);
+                $dayStmt->execute([
+                    $planId,
                     $dayNumber,
-                    $morningActivity,
-                    $afternoonActivity,
-                    $eveningActivity
+                    'Hotel accommodation',
+                    100.00 // Default accommodation cost
                 ]);
+                
+                $dayId = $conn->lastInsertId();
+                
+                // Add activities for this day
+                foreach ($dayActivities as $activityIndex => $activity) {
+                    $activityQuery = "INSERT INTO activities (day_id, activity_name, cost) 
+                                     VALUES (?, ?, ?)";
+                    $activityStmt = $conn->prepare($activityQuery);
+                    $activityStmt->execute([
+                        $dayId,
+                        $activity,
+                        0.00 // Default cost
+                    ]);
+                }
+                
+                // Add default meals
+                $mealTypes = ['Breakfast', 'Lunch', 'Dinner'];
+                foreach ($mealTypes as $type) {
+                    $mealQuery = "INSERT INTO meals (day_id, meal_type, description, cost) 
+                                 VALUES (?, ?, ?, ?)";
+                    $mealStmt = $conn->prepare($mealQuery);
+                    $mealStmt->execute([
+                        $dayId,
+                        $type,
+                        $type . ' at local restaurant',
+                        20.00 // Default cost
+                    ]);
+                }
             }
             
             $conn->commit();
             
             echo json_encode([
                 "success" => true,
-                "message" => "Reservation created successfully",
+                "message" => "Trip booked successfully",
                 "data" => [
-                    "reservationId" => $reservationId,
-                    "bookingReference" => $bookingReference
+                    "planId" => $planId,
+                    "bookingReference" => $bookingRef
                 ]
             ]);
             
-        } catch (PDOException $e) {
-            if ($conn) {
-                $conn->rollBack();
-            }
-            echo json_encode(["success" => false, "message" => "Error: " . $e->getMessage()]);
+        } catch (Exception $e) {
+            $conn->rollback();
+            echo json_encode([
+                "success" => false,
+                "message" => "Booking failed: " . $e->getMessage()
+            ]);
         }
     } else {
         echo json_encode(["success" => false, "message" => "Incomplete data"]);

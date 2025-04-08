@@ -14,7 +14,7 @@ const TripDetails = () => {
   const navigate = useNavigate();
   const [destination, setDestination] = useState<Destination | null>(null);
 
-  // Use destiantions from the mock data if the API fails
+  // Use destinations from the mock data if the API fails
   const fallbackDestinations = [
     {
       id: 1,
@@ -81,6 +81,22 @@ const TripDetails = () => {
     } else {
       toast.error('Destination not found');
     }
+  };
+
+  const renderTravelType = (groupType: string | undefined) => {
+    if (!groupType) return "Standard trip";
+    
+    const groupTypes: Record<string, string> = {
+      'family': 'Family trip',
+      'friends': 'Trip with friends',
+      'coworkers': 'Business trip',
+      'couple': 'Romantic getaway',
+      'solo': 'Solo adventure',
+      'school_group': 'School excursion',
+      'other': 'Custom trip'
+    };
+    
+    return groupTypes[groupType] || "Standard trip";
   };
 
   if (isLoading) {
@@ -158,6 +174,19 @@ const TripDetails = () => {
                 <h2 className="text-xl font-bold mb-4">About this Destination</h2>
                 <p className="text-muted-foreground">{destination.description}</p>
               </div>
+              
+              {destination.group_type && (
+                <div className="mt-4 p-3 bg-muted rounded-md">
+                  <h3 className="font-medium">Recommended Trip Type</h3>
+                  <p>{renderTravelType(destination.group_type)}</p>
+                  {destination.nb_people && (
+                    <p className="mt-2 flex items-center">
+                      <Users className="h-4 w-4 mr-1" /> 
+                      Ideal for groups of {destination.nb_people} {destination.nb_people === 1 ? 'person' : 'people'}
+                    </p>
+                  )}
+                </div>
+              )}
               
               <div className="mt-8">
                 <h2 className="text-xl font-bold mb-4">What's Included</h2>

@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $password = $data->password;
         
         // Create the query
-        $query = "SELECT id, name, email, password_hash FROM users WHERE email = ?";
+        $query = "SELECT id, name, email, hashed_password FROM travelers WHERE email = ?";
         
         // Get database connection
         $conn = getConnection();
@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
             
             // Verify the password
-            if (password_verify($password, $row['password_hash'])) {
+            if (password_verify($password, $row['hashed_password'])) {
                 echo json_encode([
                     "success" => true,
                     "message" => "Login successful",
