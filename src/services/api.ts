@@ -45,7 +45,9 @@ export const loginUser = async (email: string, password: string) => {
       body: JSON.stringify({ email, password }),
     });
     
-    return await response.json();
+    const data = await response.json();
+    console.log("Login response:", data);
+    return data;
   } catch (error) {
     console.error('Login error:', error);
     return { success: false, message: 'Network error occurred' };
